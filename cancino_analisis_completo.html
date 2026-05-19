@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cancino — Análisis de cuenta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F5F0;
+    --surface: #FFFFFF;
+    --border: rgba(0,0,0,.08);
+    --border-strong: rgba(0,0,0,.15);
+    --text-primary: #1A1A18;
+    --text-secondary: #6B6B65;
+    --text-hint: #A5A49E;
+    --red: #C53030;
+    --red-bg: #FEF2F2;
+    --red-border: #FECACA;
+    --amber: #92400E;
+    --amber-bg: #FFFBEB;
+    --amber-border: #FDE68A;
+    --green: #14532D;
+    --green-bg: #F0FDF4;
+    --green-border: #BBF7D0;
+    --blue: #1E3A5F;
+    --blue-bg: #EFF6FF;
+    --blue-border: #BFDBFE;
+    --accent: #E8572A;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+  }
+
+  html { font-size: 16px; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ── PAGE LAYOUT ── */
+  .page { max-width: 960px; margin: 0 auto; padding: 48px 32px 80px; }
+
+  /* ── BRAND HEADER ── */
+  .brand-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 48px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .brand-left { display: flex; align-items: center; gap: 16px; }
+  .brand-icon {
+    width: 52px; height: 52px;
+    background: var(--accent);
+    border-radius: var(--radius-md);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  .brand-name { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 700; letter-spacing: -.5px; }
+  .brand-sub { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+  .brand-badges { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 4px; }
+  .brand-kpis { display: flex; gap: 24px; flex-wrap: wrap; }
+  .bkpi { text-align: right; }
+  .bkpi-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 600; color: var(--red); }
+  .bkpi-label { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .06em; }
+
+  /* ── SECTION ── */
+  .section { margin-bottom: 56px; }
+  .section-label {
+    font-size: 11px; font-weight: 500; text-transform: uppercase;
+    letter-spacing: .09em; color: var(--text-hint);
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 20px;
+  }
+  .section-label::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  /* ── BADGE ── */
+  .badge {
+    font-size: 10px; font-weight: 500; padding: 3px 8px;
+    border-radius: 20px; white-space: nowrap; display: inline-block;
+    border: 1px solid;
+  }
+  .badge-red { background: var(--red-bg); color: var(--red); border-color: var(--red-border); }
+  .badge-amber { background: var(--amber-bg); color: var(--amber); border-color: var(--amber-border); }
+  .badge-green { background: var(--green-bg); color: var(--green); border-color: var(--green-border); }
+  .badge-blue { background: var(--blue-bg); color: var(--blue); border-color: var(--blue-border); }
+  .badge-gray { background: #F5F5F3; color: var(--text-secondary); border-color: var(--border); }
+
+  /* ── CHART TABLE ── */
+  .chart-header {
+    display: flex; justify-content: space-between;
+    align-items: baseline; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;
+  }
+  .chart-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 600; }
+  .legend { display: flex; gap: 16px; font-size: 12px; color: var(--text-secondary); }
+  .legend span { display: flex; align-items: center; gap: 6px; }
+  .leg-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  .chart-table { width: 100%; border-collapse: collapse; }
+  .chart-table thead th {
+    font-size: 10px; font-weight: 500; text-transform: uppercase;
+    letter-spacing: .07em; color: var(--text-hint);
+    padding: 0 0 10px; border-bottom: 1px solid var(--border);
+    text-align: left;
+  }
+  .chart-table thead th:not(:first-child):not(:nth-child(2)) { text-align: right; }
+  .chart-table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background .15s;
+  }
+  .chart-table tbody tr:last-child { border-bottom: none; }
+  .chart-table tbody tr:hover { background: rgba(0,0,0,.02); }
+  .chart-table td { padding: 9px 0; vertical-align: middle; }
+  .chart-table td:not(:first-child):not(:nth-child(2)) { text-align: right; }
+
+  .td-name { width: 160px; font-size: 13px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .td-bar { min-width: 180px; }
+  .td-num { font-size: 13px; width: 60px; color: var(--text-secondary); }
+  .td-now { font-size: 13px; width: 60px; font-weight: 500; }
+  .td-delta { font-size: 12px; font-weight: 600; width: 56px; }
+  .delta-red { color: var(--red); }
+  .delta-amber { color: var(--amber); }
+  .delta-green { color: var(--green); }
+
+  .bar-wrap { position: relative; height: 8px; background: #EEEDE8; border-radius: 4px; overflow: hidden; }
+  .bar-may { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #DBEAFE; border-radius: 4px; }
+  .bar-now { position: absolute; top: 0; left: 0; height: 100%; background: #3B82F6; border-radius: 4px; }
+
+  /* ── STORE CARDS ── */
+  .store-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+  .store-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    transition: box-shadow .2s, transform .2s;
+  }
+  .store-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,.06); transform: translateY(-1px); }
+  .store-card-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .store-name { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 600; }
+  .store-kpis { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+  .skpi { font-size: 11px; color: var(--text-secondary); }
+  .skpi-val { font-weight: 500; color: var(--text-primary); }
+  .skpi-ok { color: var(--green); }
+  .skpi-bad { color: var(--red); }
+  .skpi-warn { color: var(--amber); }
+  .store-insight {
+    font-size: 12px; color: var(--text-secondary); line-height: 1.6;
+    border-top: 1px solid var(--border); padding-top: 10px; margin-top: 6px;
+  }
+
+  /* ── MATRIX ── */
+  .matrix { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .mq {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 16px 18px;
+  }
+  .mq-label { font-size: 11px; font-weight: 600; margin-bottom: 6px; }
+  .mq-stores { font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 6px; }
+  .mq-action { font-size: 12px; color: var(--text-secondary); line-height: 1.55; }
+
+  /* ── SEGMENT CARDS ── */
+  .seg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 12px; }
+  .seg-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+  }
+  .seg-head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .seg-icon {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .seg-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 600; margin-bottom: 1px; }
+  .seg-sub { font-size: 11px; color: var(--text-secondary); }
+  .tactic { margin-bottom: 12px; }
+  .tactic-label {
+    font-size: 10px; font-weight: 500; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--text-hint); margin-bottom: 3px;
+  }
+  .tactic-val { font-size: 12px; color: var(--text-primary); line-height: 1.6; }
+  .budget { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
+  .budget-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); margin-bottom: 5px; }
+  .budget-row span:last-child { font-weight: 600; }
+  .budget-bar { height: 4px; background: #EEEDE8; border-radius: 2px; overflow: hidden; }
+  .budget-fill { height: 100%; border-radius: 2px; }
+
+  /* ── ALERT BOX ── */
+  .alert-box {
+    background: var(--amber-bg);
+    border: 1px solid var(--amber-border);
+    border-radius: var(--radius-md);
+    padding: 14px 18px;
+    font-size: 13px;
+    color: var(--amber);
+    line-height: 1.6;
+    display: flex; gap: 10px; align-items: flex-start;
+    margin-top: 16px;
+  }
+  .alert-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── FOOTER NOTE ── */
+  .footnote { font-size: 11px; color: var(--text-hint); margin-top: 10px; }
+
+  /* ── DIVIDER ── */
+  .divider { height: 1px; background: var(--border); margin: 0 0 48px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="brand-header">
+    <div class="brand-left">
+      <div class="brand-icon">🍕</div>
+      <div>
+        <p class="brand-name">Cancino</p>
+        <p class="brand-sub">13 sucursales · Ciudad de México · KAM: Mariana Palacios</p>
+        <div class="brand-badges" style="margin-top:8px">
+          <span class="badge badge-red">-40.76% vs objetivo</span>
+          <span class="badge badge-red">-$553,582.85</span>
+          <span class="badge badge-amber">Defect Rate 1.86%</span>
+          <span class="badge badge-gray">Market share 4.9%</span>
+        </div>
+      </div>
+    </div>
+    <div class="brand-kpis">
+      <div class="bkpi">
+        <div class="bkpi-val">-9%</div>
+        <div class="bkpi-label">Venta YTD vs LY</div>
+      </div>
+      <div class="bkpi">
+        <div class="bkpi-val">-10.2%</div>
+        <div class="bkpi-label">Órdenes YTD vs LY</div>
+      </div>
+      <div class="bkpi">
+        <div class="bkpi-val" style="color:var(--green)">+1.18%</div>
+        <div class="bkpi-label">AOV vs LY</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 1: CAÍDA POR TIENDA -->
+  <div class="section">
+    <div class="section-label">01 — Caída de órdenes por tienda</div>
+    <div class="chart-header">
+      <p class="chart-title">Mayo 2025 vs promedio feb–abr 2026</p>
+      <div class="legend">
+        <span><span class="leg-dot" style="background:#DBEAFE"></span>Mayo 2025 (pico)</span>
+        <span><span class="leg-dot" style="background:#3B82F6"></span>Prom. feb–abr 2026</span>
+      </div>
+    </div>
+    <table class="chart-table">
+      <thead>
+        <tr>
+          <th class="td-name">Tienda</th>
+          <th class="td-bar">Volumen comparativo</th>
+          <th class="td-num">May 25</th>
+          <th class="td-now">Prom 26</th>
+          <th class="td-delta">Delta</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="td-name">Alameda <span class="badge badge-red">crítico</span></td><td class="td-bar"><div class="bar-wrap"><div class="bar-may"></div><div class="bar-now" style="width:19.8%"></div></div></td><td class="td-num">873</td><td class="td-now">173</td><td class="td-delta delta-red">−80%</td></tr>
+        <tr><td class="td-name">Coyoacán <span class="badge badge-red">crítico</span></td><td class="td-bar"><div class="bar-wrap"><div class="bar-may"></div><div class="bar-now" style="width:31.1%"></div></div></td><td class="td-num">1,419</td><td class="td-now">442</td><td class="td-delta delta-red">−69%</td></tr>
+        <tr><td class="td-name">Pedregal <span class="badge badge-red">crítico</span></td><td class="td-bar"><div class="bar-wrap"><div class="bar-may"></div><div class="bar-now" style="width:37.1%"></div></div></td><td class="td-num">948</td><td class="td-now">352</td><td class="td-delta delta-red">−63%</td></tr>
+        <tr><td class="td-name">San Ángel</td><td class="td-bar"><div class="bar-wrap"><div class="bar-may"></div><div class="bar-now" style="width:44.1%"></div></div></td><td class="td-num">997</td><td class="td-now">440</td><td class="td-delta delta-amber">−56%</td></tr>
+        <tr><td class="td-name">Mixcoac</td><td class="td-bar"><div class="bar-wrap"><div class="bar-may"></div><div class="bar-now" style="width:48.1%"></div></div></td><td class="td-num">983</td><td class="td-now">473</td><td class="td-delta delta-amber">−52%</td></tr>
+        <tr><td class="td-name">Cabrera</td><td class="td-bar"><div class="bar-wrap"><div class="bar-may"></div><div class="bar-now" style="width:49.3%"></div></div></td><td class="td-num">978</td><td class="td-now">482</td><td class="td-delta delta-amber">−51%</td></tr>
+        <tr><td class="td-name">Cibeles</td><td class="td-bar"><div class="bar-wrap"><div class="bar-may"></div><div class="bar-now" style="width:50.5%"></div></div></td><td class="td-num">842</td><td class="td-now">425</td><td class="td-delta delta-amber">−50%</td></tr>
+        <tr><td class="td-name">Prado</td><td class="td-bar"><div class="bar-wrap"><div class="bar-may"></div><div class="bar-now" style="width:51.4%"></div></div></td><td class="td-num">630</td><td class="td-now">324</td><td class="td-delta delta-amber">−49%</td></tr>
+        <tr><td class="td-name">Bosques</td><td class="td-bar"><div class="bar-wrap"><div class="bar-may"></div><div class="bar-now" style="width:53.8%"></div></div></td><td class="td-num">833</td><td class="td-now">448</td><td class="td-delta delta-amber">−46%</td></tr>
+        <tr><td class="td-name">San Miguel</td><td class="td-bar"><div class="bar-wrap"><div class="bar-may"></div><div class="bar-now" style="width:57.2%"></div></div></td><td class="td-num">488</td><td class="td-now">279</td><td class="td-delta delta-amber">−43%</td></tr>
+        <tr><td class="td-name">Polanco</td><td class="td-bar"><div class="bar-wrap"><div class="bar-may"></div><div class="bar-now" style="width:58.2%"></div></div></td><td class="td-num">1,085</td><td class="td-now">631</td><td class="td-delta delta-amber">−42%</td></tr>
+        <tr><td class="td-name">Nápoles</td><td class="td-bar"><div class="bar-wrap"><div class="bar-may"></div><div class="bar-now" style="width:63.1%"></div></div></td><td class="td-num">1,430</td><td class="td-now">902</td><td class="td-delta delta-green">−37%</td></tr>
+        <tr><td class="td-name">Havre <span class="badge badge-green">resiliente</span></td><td class="td-bar"><div class="bar-wrap"><div class="bar-may"></div><div class="bar-now" style="width:77.7%"></div></div></td><td class="td-num">494</td><td class="td-now">384</td><td class="td-delta delta-green">−22%</td></tr>
+      </tbody>
+    </table>
+    <p class="footnote">Datos calculados sobre Data Export Cancino. Mayo 2025 = pico máximo de la cuenta. Prom. feb–abr 2026 = promedio de los últimos 3 meses cerrados.</p>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- SECCIÓN 2: ANÁLISIS POR TIENDA -->
+  <div class="section">
+    <div class="section-label">02 — Análisis por tienda · situación y palanca</div>
+    <div class="store-grid">
+
+      <div class="store-card">
+        <div class="store-card-head"><p class="store-name">Nápoles</p><span class="badge badge-green">motor de la red</span></div>
+        <div class="store-kpis">
+          <div class="skpi">GMV Q1 <span class="skpi-val">$1.35M</span></div>
+          <div class="skpi">Órd. mar <span class="skpi-val">965</span></div>
+          <div class="skpi">CVR <span class="skpi-val skpi-ok">31.6%</span></div>
+          <div class="skpi">AOV <span class="skpi-val">$438</span></div>
+          <div class="skpi">Caída <span class="skpi-val skpi-warn">−37%</span></div>
+        </div>
+        <p class="store-insight">Mayor volumen de la red. CVR sólido y tráfico sostenido (~3K/mes). AOV bajo para su volumen — oportunidad de upsell. Tienda ancla para cualquier inversión en Ads.</p>
+      </div>
+
+      <div class="store-card">
+        <div class="store-card-head"><p class="store-name">Polanco</p><span class="badge badge-red">rescatar</span></div>
+        <div class="store-kpis">
+          <div class="skpi">GMV Q1 <span class="skpi-val">$1.05M</span></div>
+          <div class="skpi">Órd. mar <span class="skpi-val">600</span></div>
+          <div class="skpi">CVR <span class="skpi-val skpi-ok">31.6%</span></div>
+          <div class="skpi">AOV <span class="skpi-val">$479</span></div>
+          <div class="skpi">Caída <span class="skpi-val skpi-warn">−42%</span></div>
+        </div>
+        <p class="store-insight">CVR alto y AOV sólido — el problema no es conversión sino tráfico y defect rate (3.06%). Cooking time de 30 min aleja usuarios. Recuperable si se resuelve ops primero.</p>
+      </div>
+
+      <div class="store-card">
+        <div class="store-card-head"><p class="store-name">Bosques</p><span class="badge badge-green">escalar</span></div>
+        <div class="store-kpis">
+          <div class="skpi">GMV Q1 <span class="skpi-val">$856K</span></div>
+          <div class="skpi">Órd. mar <span class="skpi-val">423</span></div>
+          <div class="skpi">CVR <span class="skpi-val skpi-warn">23.6%</span></div>
+          <div class="skpi">AOV <span class="skpi-val skpi-ok">$637</span></div>
+          <div class="skpi">Caída <span class="skpi-val skpi-warn">−46%</span></div>
+        </div>
+        <p class="store-insight">AOV más alto de toda la red ($637). CVR mejorable — hay tráfico pero bajo aprovechamiento. Zona premium con potencial alto si se activa Turbo y mejora catálogo.</p>
+      </div>
+
+      <div class="store-card">
+        <div class="store-card-head"><p class="store-name">San Ángel</p><span class="badge badge-amber">optimizar ops</span></div>
+        <div class="store-kpis">
+          <div class="skpi">GMV Q1 <span class="skpi-val">$772K</span></div>
+          <div class="skpi">Órd. mar <span class="skpi-val">422</span></div>
+          <div class="skpi">CVR <span class="skpi-val skpi-ok">29.2%</span></div>
+          <div class="skpi">AOV <span class="skpi-val skpi-ok">$586</span></div>
+          <div class="skpi">Caída <span class="skpi-val skpi-bad">−56%</span></div>
+        </div>
+        <p class="store-insight">AOV muy sólido y buen CVR, pero defect rate 2.39% y cooking time 29 min frenan el crecimiento. Alto potencial si se estabiliza operativamente.</p>
+      </div>
+
+      <div class="store-card">
+        <div class="store-card-head"><p class="store-name">Mixcoac</p><span class="badge badge-green">referente ops</span></div>
+        <div class="store-kpis">
+          <div class="skpi">GMV Q1 <span class="skpi-val">$744K</span></div>
+          <div class="skpi">Órd. mar <span class="skpi-val">483</span></div>
+          <div class="skpi">CVR <span class="skpi-val skpi-ok">29.8%</span></div>
+          <div class="skpi">AOV <span class="skpi-val">$525</span></div>
+          <div class="skpi">Caída <span class="skpi-val skpi-warn">−52%</span></div>
+        </div>
+        <p class="store-insight">Mejor cooking time de la red (13 min). CVR y AOV sólidos. Modelo operativo a replicar. Activar Turbo aquí primero.</p>
+      </div>
+
+      <div class="store-card">
+        <div class="store-card-head"><p class="store-name">Cabrera</p><span class="badge badge-amber">estabilizar</span></div>
+        <div class="store-kpis">
+          <div class="skpi">GMV Q1 <span class="skpi-val">$714K</span></div>
+          <div class="skpi">Órd. mar <span class="skpi-val">487</span></div>
+          <div class="skpi">CVR <span class="skpi-val skpi-ok">28.6%</span></div>
+          <div class="skpi">AOV <span class="skpi-val">$494</span></div>
+          <div class="skpi">Caída <span class="skpi-val skpi-warn">−51%</span></div>
+        </div>
+        <p class="store-insight">Desempeño estable. El markdown se cortó abruptamente en jun 2025 y coincide con la caída. Reactivar promos con cuidado y medir impacto antes de escalar.</p>
+      </div>
+
+      <div class="store-card">
+        <div class="store-card-head"><p class="store-name">Coyoacán</p><span class="badge badge-amber">recuperar conversión</span></div>
+        <div class="store-kpis">
+          <div class="skpi">GMV Q1 <span class="skpi-val">$697K</span></div>
+          <div class="skpi">Órd. mar <span class="skpi-val">414</span></div>
+          <div class="skpi">CVR <span class="skpi-val skpi-bad">20.5%</span></div>
+          <div class="skpi">AOV <span class="skpi-val skpi-ok">$525</span></div>
+          <div class="skpi">Caída <span class="skpi-val skpi-bad">−69%</span></div>
+        </div>
+        <p class="store-insight">CVR más bajo de la red con el segundo mayor tráfico. Muchos usuarios llegan y no compran. Problema de catálogo o fotos. Resolver conversión antes de invertir en tráfico.</p>
+      </div>
+
+      <div class="store-card">
+        <div class="store-card-head"><p class="store-name">Cibeles</p><span class="badge badge-blue">eficiente</span></div>
+        <div class="store-kpis">
+          <div class="skpi">GMV Q1 <span class="skpi-val">$657K</span></div>
+          <div class="skpi">Órd. mar <span class="skpi-val">442</span></div>
+          <div class="skpi">CVR <span class="skpi-val skpi-ok">30.4%</span></div>
+          <div class="skpi">AOV <span class="skpi-val">$516</span></div>
+          <div class="skpi">Caída <span class="skpi-val skpi-warn">−50%</span></div>
+        </div>
+        <p class="store-insight">Buen CVR con tráfico bajo — convierte bien pero necesita más visitantes. Candidata ideal para Ads geográficos de awareness zonal.</p>
+      </div>
+
+      <div class="store-card">
+        <div class="store-card-head"><p class="store-name">Pedregal</p><span class="badge badge-amber">AOV alto, ops débil</span></div>
+        <div class="store-kpis">
+          <div class="skpi">GMV Q1 <span class="skpi-val">$633K</span></div>
+          <div class="skpi">Órd. mar <span class="skpi-val">368</span></div>
+          <div class="skpi">CVR <span class="skpi-val skpi-warn">23.3%</span></div>
+          <div class="skpi">AOV <span class="skpi-val skpi-ok">$599</span></div>
+          <div class="skpi">Caída <span class="skpi-val skpi-bad">−63%</span></div>
+        </div>
+        <p class="store-insight">AOV de los más altos ($599) pero CVR bajo y cooking time de 29 min. Cliente de alto valor y exigente con los tiempos. Ops primero, Ads después.</p>
+      </div>
+
+      <div class="store-card">
+        <div class="store-card-head"><p class="store-name">Prado</p><span class="badge badge-blue">consistente</span></div>
+        <div class="store-kpis">
+          <div class="skpi">GMV Q1 <span class="skpi-val">$567K</span></div>
+          <div class="skpi">Órd. mar <span class="skpi-val">346</span></div>
+          <div class="skpi">CVR <span class="skpi-val skpi-ok">30.3%</span></div>
+          <div class="skpi">AOV <span class="skpi-val skpi-ok">$582</span></div>
+          <div class="skpi">Caída <span class="skpi-val skpi-warn">−49%</span></div>
+        </div>
+        <p class="store-insight">Buen CVR y AOV alto con volumen estable. Zona residencial Las Lomas. Candidata a activar Turbo para capturar órdenes express.</p>
+      </div>
+
+      <div class="store-card">
+        <div class="store-card-head"><p class="store-name">San Miguel</p><span class="badge badge-green">en recuperación</span></div>
+        <div class="store-kpis">
+          <div class="skpi">GMV Q1 <span class="skpi-val">$424K</span></div>
+          <div class="skpi">Órd. mar <span class="skpi-val">306</span></div>
+          <div class="skpi">CVR <span class="skpi-val skpi-ok">27.9%</span></div>
+          <div class="skpi">AOV <span class="skpi-val">$508</span></div>
+          <div class="skpi">Caída <span class="skpi-val skpi-warn">−43%</span></div>
+        </div>
+        <p class="store-insight">Cooking time 17 min (2do mejor de la red). Creció +22.4% en marzo. Tienda en momentum positivo — sostener con Ads ligeros.</p>
+      </div>
+
+      <div class="store-card">
+        <div class="store-card-head"><p class="store-name">Havre</p><span class="badge badge-green">más resiliente</span></div>
+        <div class="store-kpis">
+          <div class="skpi">GMV Q1 <span class="skpi-val">$537K</span></div>
+          <div class="skpi">Órd. mar <span class="skpi-val">381</span></div>
+          <div class="skpi">CVR <span class="skpi-val skpi-ok">29.3%</span></div>
+          <div class="skpi">AOV <span class="skpi-val">$467</span></div>
+          <div class="skpi">Caída <span class="skpi-val skpi-ok">−22%</span></div>
+        </div>
+        <p class="store-insight">Solo cayó 22% desde el pico — base más fiel de la red. Ideal para probar mecánicas de retención antes de escalarlas a otras tiendas.</p>
+      </div>
+
+      <div class="store-card" style="border-color: var(--red-border);">
+        <div class="store-card-head"><p class="store-name">Alameda</p><span class="badge badge-red">revisar viabilidad</span></div>
+        <div class="store-kpis">
+          <div class="skpi">GMV Q1 <span class="skpi-val">$252K</span></div>
+          <div class="skpi">Órd. mar <span class="skpi-val">156</span></div>
+          <div class="skpi">CVR <span class="skpi-val skpi-bad">13.0%</span></div>
+          <div class="skpi">AOV <span class="skpi-val">$486</span></div>
+          <div class="skpi">Caída <span class="skpi-val skpi-bad">−80%</span></div>
+        </div>
+        <p class="store-insight">CVR de 13% (la mitad del promedio). Mayor caída y menor GMV de la red. No invertir aquí hasta resolver conversión y disponibilidad. Evaluar pausa operativa.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- SECCIÓN 3: MATRIZ -->
+  <div class="section">
+    <div class="section-label">03 — Matriz de priorización · dónde invertir primero</div>
+    <div class="matrix">
+      <div class="mq" style="border-top: 3px solid #16A34A;">
+        <p class="mq-label" style="color: var(--green);">Alto CVR + alto tráfico → escalar</p>
+        <p class="mq-stores">Nápoles, Polanco, Cibeles</p>
+        <p class="mq-action">Ya convierten bien. Más tráfico vía Ads = más ventas directas sin cambiar nada operativo.</p>
+      </div>
+      <div class="mq" style="border-top: 3px solid #2563EB;">
+        <p class="mq-label" style="color: var(--blue);">Alto CVR + bajo tráfico → activar tráfico</p>
+        <p class="mq-stores">Havre, Prado, San Miguel, Mixcoac</p>
+        <p class="mq-action">Convierten bien pero les falta volumen. Ads geográficos locales para traer más visitantes.</p>
+      </div>
+      <div class="mq" style="border-top: 3px solid #D97706;">
+        <p class="mq-label" style="color: var(--amber);">Bajo CVR + alto tráfico → mejorar catálogo</p>
+        <p class="mq-stores">Coyoacán, Bosques</p>
+        <p class="mq-action">Llegan usuarios y no compran. Mejorar fotos, precios y promos antes de invertir en más tráfico.</p>
+      </div>
+      <div class="mq" style="border-top: 3px solid #DC2626;">
+        <p class="mq-label" style="color: var(--red);">Bajo CVR + bajo tráfico → no invertir aún</p>
+        <p class="mq-stores">Alameda, Pedregal, San Ángel</p>
+        <p class="mq-action">Resolver ops y disponibilidad primero. Ads aquí es inversión perdida.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- SECCIÓN 4: ESTRATEGIA ADS POR SEGMENTO -->
+  <div class="section">
+    <div class="section-label">04 — Estrategia de ADS y promociones por segmento de usuario</div>
+    <div class="seg-grid">
+
+      <div class="seg-card">
+        <div class="seg-head">
+          <div class="seg-icon" style="background: var(--blue-bg); color: var(--blue);">🆕</div>
+          <div>
+            <p class="seg-title">Nuevos</p>
+            <p class="seg-sub">3,268 usuarios · 26.9% del total en marzo</p>
+          </div>
+        </div>
+        <div class="tactic"><p class="tactic-label">Objetivo</p><p class="tactic-val">Adquisición y asegurar segunda orden dentro de los primeros 30 días.</p></div>
+        <div class="tactic"><p class="tactic-label">Ads</p><p class="tactic-val">Sponsored Search en Rappi sobre términos de descubrimiento: "pizza CDMX", "italiana delivery". Foco en Nápoles, Cibeles y Cabrera (CVR alto).</p></div>
+        <div class="tactic"><p class="tactic-label">Promoción</p><p class="tactic-val">20% de descuento en primera orden, mínimo $250. Solo activar en tiendas con CVR &gt;28% para no desperdiciar el incentivo.</p></div>
+        <div class="tactic"><p class="tactic-label">Retención post-primera orden</p><p class="tactic-val">Push a 72h: "$50 de descuento en tu próxima Margherita". Ventana de 7 días para canjear.</p></div>
+        <div class="budget">
+          <div class="budget-row"><span>Presupuesto sugerido del total</span><span style="color: var(--blue)">30%</span></div>
+          <div class="budget-bar"><div class="budget-fill" style="width:30%; background:#3B82F6"></div></div>
+        </div>
+      </div>
+
+      <div class="seg-card">
+        <div class="seg-head">
+          <div class="seg-icon" style="background: var(--green-bg); color: var(--green);">🔁</div>
+          <div>
+            <p class="seg-title">Retenidos</p>
+            <p class="seg-sub">2,601 usuarios · 21.4% del total en marzo</p>
+          </div>
+        </div>
+        <div class="tactic"><p class="tactic-label">Objetivo</p><p class="tactic-val">Subir frecuencia de 1.24x a 1.6x/mes e incrementar AOV con upsell.</p></div>
+        <div class="tactic"><p class="tactic-label">Ads</p><p class="tactic-val">Remarketing a compradores de los últimos 30 días mostrando producto complementario al que ya pidieron (ej: si pidió Margherita → mostrar Prosciutto o Gorgonzola).</p></div>
+        <div class="tactic"><p class="tactic-label">Promoción</p><p class="tactic-val">Bundle dominical Prime: Combo Cancino + bebida + postre a precio especial. Domingo concentra el 27% de las órdenes semanales — día de mayor impacto.</p></div>
+        <div class="tactic"><p class="tactic-label">Mecánica de frecuencia</p><p class="tactic-val">Loyalty stamp digital: "Tu 5ta pizza tiene 50% de descuento". Rastreable dentro de la app Rappi.</p></div>
+        <div class="budget">
+          <div class="budget-row"><span>Presupuesto sugerido del total</span><span style="color: var(--green)">25%</span></div>
+          <div class="budget-bar"><div class="budget-fill" style="width:25%; background:#16A34A"></div></div>
+        </div>
+      </div>
+
+      <div class="seg-card">
+        <div class="seg-head">
+          <div class="seg-icon" style="background: var(--amber-bg); color: var(--amber);">💤</div>
+          <div>
+            <p class="seg-title">Perdidos / Reactivados</p>
+            <p class="seg-sub">6,296 usuarios · 51.8% del total activo</p>
+          </div>
+        </div>
+        <div class="tactic"><p class="tactic-label">Objetivo</p><p class="tactic-val">Recuperar los +8,000 usuarios perdidos entre jun–dic 2025 que nunca regresaron. Mayor impacto potencial en volumen de toda la estrategia.</p></div>
+        <div class="tactic"><p class="tactic-label">Ads</p><p class="tactic-val">Campaña de Reactivación Rappi. Segmentar en dos grupos: (a) inactivos 60–120 días y (b) inactivos &gt;120 días con historial de 3+ órdenes. Mensaje diferente para cada grupo. Tiendas prioritarias: Nápoles, Polanco y Mixcoac.</p></div>
+        <div class="tactic"><p class="tactic-label">Promo win-back</p><p class="tactic-val">60–120 días inactivos → free delivery en próxima orden. Más de 120 días → 25% de descuento en orden mínima de $300. No aplicar en tiendas con Defect Rate &gt;1.8%.</p></div>
+        <div class="budget">
+          <div class="budget-row"><span>Presupuesto sugerido del total</span><span style="color: var(--amber)">45%</span></div>
+          <div class="budget-bar"><div class="budget-fill" style="width:45%; background:#D97706"></div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="alert-box">
+      <span class="alert-icon">⚠️</span>
+      <span>No lanzar reactivación masiva antes de que el Defect Rate baje de 1.5% en las tiendas objetivo. Traer usuarios a una mala experiencia consolida la pérdida y hace más difícil recuperarlos después. La inversión en Ads siempre va después de resolver ops, no antes.</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
